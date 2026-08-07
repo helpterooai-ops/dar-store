@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدار نت | المتجر الرسمي</title>
+    <meta name="description" content="المتجر الرسمي لتطبيق الدار نت — حمّل آخر إصدار وتابع كل جديد.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/themes.css">
+    <link rel="stylesheet" href="assets/css/store.css">
+</head>
+<body>
+
+    <div id="announcement-bar" class="announcement hidden"><span class="ms">campaign</span><p id="announcement-text"></p></div>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="logo" href="#top">
+                <span class="logo-badge"><span class="ms">wifi</span></span>
+                <span id="store-title" class="logo-text">الدار نت</span>
+            </a>
+            <nav class="site-nav">
+                <a href="#features">المميزات</a>
+                <a href="#screenshots">اللقطات</a>
+                <a href="#versions">الإصدارات</a>
+                <a href="#about">حول</a>
+                <a href="#contact">تواصل</a>
+            </nav>
+            <button id="theme-toggle" class="icon-btn" aria-label="تبديل الوضع"><span class="ms">light_mode</span></button>
+        </div>
+    </header>
+
+    <main id="top">
+        <section class="hero" id="hero">
+            <div class="hero-glass">
+                <div class="hero-icon-wrap">
+                    <img id="app-icon" alt="شعار التطبيق" hidden>
+                    <span class="ms hero-fallback">wifi</span>
+                </div>
+                <h1 id="app-name">الدار نت</h1>
+                <p id="app-short" class="hero-short"></p>
+                <div class="hero-meta">
+                    <span class="chip"><span class="ms">new_releases</span><b id="app-version">--</b></span>
+                    <span class="chip"><span class="ms">calendar_month</span><b id="app-date">--</b></span>
+                    <span class="chip"><span class="ms">android</span> أندرويد</span>
+                </div>
+                <div class="hero-actions">
+                    <a id="btn-download" class="btn btn-primary" href="#" download><span class="ms">download</span> تحميل التطبيق</a>
+                    <a class="btn btn-ghost" href="#whatsnew"><span class="ms">auto_awesome</span> ماذا الجديد؟</a>
+                </div>
+            </div>
+            <div class="hero-banner"><img id="app-banner" alt="" hidden></div>
+        </section>
+
+        <section id="screenshots" class="section">
+            <h2 class="section-title">لقطات من التطبيق</h2>
+            <div id="shots-track" class="shots-track"></div>
+        </section>
+
+        <section id="features" class="section">
+            <h2 class="section-title">المميزات</h2>
+            <div id="features-grid" class="features-grid"></div>
+        </section>
+
+        <section id="whatsnew" class="section">
+            <h2 class="section-title">ماذا الجديد</h2>
+            <div class="glass-card prose" id="whatsnew-body"></div>
+        </section>
+
+        <section id="versions" class="section">
+            <h2 class="section-title">سجل الإصدارات</h2>
+            <div id="versions-list" class="versions-list"></div>
+        </section>
+
+        <section id="about" class="section">
+            <h2 class="section-title">عن التطبيق</h2>
+            <div class="glass-card prose" id="about-body"></div>
+        </section>
+
+        <section id="brand" class="section">
+            <h2 class="section-title">عن أثير</h2>
+            <div class="glass-card prose" id="brand-body"></div>
+        </section>
+
+        <section id="contact" class="section">
+            <h2 class="section-title">تواصل معنا</h2>
+            <div id="contact-grid" class="contact-grid"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p id="footer-note"></p>
+        <div class="footer-links">
+            <a href="#/privacy">سياسة الخصوصية</a>
+            <a href="#/terms">شروط الاستخدام</a>
+        </div>
+    </footer>
+
+    <section id="page-privacy" class="standalone-page hidden">
+        <div class="glass-card prose"><h2>سياسة الخصوصية</h2><div id="privacy-body"></div></div>
+        <a class="btn btn-ghost" href="#top"><span class="ms">home</span> عودة للمتجر</a>
+    </section>
+
+    <section id="page-terms" class="standalone-page hidden">
+        <div class="glass-card prose"><h2>شروط الاستخدام</h2><div id="terms-body"></div></div>
+        <a class="btn btn-ghost" href="#top"><span class="ms">home</span> عودة للمتجر</a>
+    </section>
+
+    <div id="lightbox" class="lightbox hidden">
+        <img id="lightbox-img" alt="">
+        <button class="icon-btn lightbox-close"><span class="ms">close</span></button>
+    </div>
+
+    <script type="module" src="assets/js/store/app.js"></script>
+</body>
+</html>
