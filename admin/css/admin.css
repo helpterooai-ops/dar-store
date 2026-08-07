@@ -1,0 +1,77 @@
+/* ===== الدخول ===== */
+.admin-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; z-index: 1; }
+.login-card { max-width: 430px; width: 100%; text-align: center; display: flex; flex-direction: column; gap: 14px; }
+.login-logo { width: 72px; height: 72px; margin: 0 auto; border-radius: 22px; background: linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent))); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 14px 34px -10px rgba(217,119,6,.55); }
+.login-logo .ms { font-size: 38px; }
+.login-card h1 { font-size: 1.4rem; font-weight: 900; }
+.login-card p { color: var(--text-muted); font-size: .9rem; }
+.login-error { color: #f87171; font-size: .85rem; font-weight: 700; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ===== الهيدر ===== */
+.admin-header { position: sticky; top: 10px; z-index: 40; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 18px; margin: 12px auto; max-width: 1240px; border-radius: var(--radius-lg); flex-wrap: wrap; }
+.admin-brand { display: flex; gap: 10px; align-items: center; font-size: 1.05rem; font-weight: 900; }
+.admin-brand .ms { color: var(--accent); font-size: 26px; }
+.admin-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* ===== الجسم والتبويبات ===== */
+.admin-body { max-width: 1240px; margin: 0 auto; padding: 0 16px 90px; display: grid; grid-template-columns: 250px 1fr; gap: 16px; align-items: start; position: relative; z-index: 1; }
+.admin-tabs { display: flex; flex-direction: column; padding: 10px; gap: 4px; position: sticky; top: 92px; }
+.tab { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px; font-weight: 700; color: var(--text-muted); font-size: .92rem; transition: .2s; text-align: right; }
+.tab:hover { background: var(--glass-hover); color: var(--text); }
+.tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent))); color: #fff; box-shadow: 0 8px 20px -8px rgba(217,119,6,.5); }
+.tab .ms { font-size: 20px; }
+
+.admin-content { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: flex; flex-direction: column; gap: 14px; animation: adminFade .3s var(--ease); }
+.tab-panel h2 { font-size: 1.25rem; font-weight: 900; }
+.hint { color: var(--text-muted); font-size: .85rem; }
+@keyframes adminFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ===== الحقول ===== */
+.field { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: inherit; font-size: .95rem; outline: none; transition: .2s; backdrop-filter: blur(10px); }
+.field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,119,6,.15); }
+label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; font-size: .88rem; color: var(--text-muted); }
+textarea.field { resize: vertical; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ===== الوسائط ===== */
+.media-box { display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; }
+.media-box h3 { font-size: .95rem; color: var(--text); }
+.media-prev { width: 110px; height: 110px; object-fit: cover; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--glass-hover); }
+.media-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.media-item { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); background: var(--glass-bg); }
+.media-item img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; }
+.mi-actions { position: absolute; bottom: 0; inset-inline: 0; display: flex; justify-content: center; gap: 6px; padding: 8px; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
+.mi-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); transition: .2s; }
+.mi-btn:hover { background: var(--accent); }
+.mi-btn .ms { font-size: 18px; }
+
+/* ===== الصفوف (إصدارات/مميزات) ===== */
+.rows { display: flex; flex-direction: column; gap: 10px; }
+.row-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; flex-wrap: wrap; }
+.ri-title { font-weight: 800; color: var(--text); }
+.ri-sub { color: var(--text-muted); font-size: .82rem; white-space: pre-line; }
+.row-actions { display: flex; gap: 6px; }
+.add-form { display: flex; flex-direction: column; gap: 12px; }
+
+/* ===== المفاتيح ===== */
+.switches { display: flex; flex-direction: column; gap: 10px; }
+.switch-row, .switch-item { display: flex; align-items: center; gap: 12px; font-weight: 700; color: var(--text); }
+.switch-item { padding: 14px 18px; }
+input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; }
+.row-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ===== التوست ===== */
+.admin-toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 100; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); color: var(--text); padding: 12px 26px; border-radius: var(--radius-pill); font-weight: 800; font-size: .9rem; box-shadow: var(--shadow-glass); max-width: 92vw; text-align: center; }
+.admin-toast.ok { border-color: #10b981; color: #34d399; }
+.admin-toast.err { border-color: #ef4444; color: #f87171; }
+
+/* ===== الجوال ===== */
+@media (max-width: 900px) {
+    .admin-body { grid-template-columns: 1fr; }
+    .admin-tabs { flex-direction: row; overflow-x: auto; position: static; }
+    .tab { white-space: nowrap; }
+    .grid-2 { grid-template-columns: 1fr; }
+}

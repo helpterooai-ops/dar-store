@@ -195,3 +195,5 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     .section-title { font-size: 1.3rem; }
     .btn { padding: 12px 20px; font-size: .9rem; }
 }
+
+[hidden] { display: none !important; }

@@ -45,7 +45,7 @@ export class Renderer {
         // الإعلان
         if (app.announcement?.enabled && app.announcement.text) {
             this.setText('announcement-text', app.announcement.text);
-            document.getElementById('announcement-bar')?.classList.remove('hidden');
+            const bar = document.getElementById('announcement-bar'); if (bar) { bar.classList.remove('hidden'); bar.dataset.enabled = '1'; }
         }
 
         // What's New

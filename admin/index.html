@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة إدارة المتجر | الدار نت</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/themes.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+    <!-- الدخول -->
+    <section id="login-view" class="admin-login">
+        <div class="glass-card login-card">
+            <div class="login-logo"><span class="ms">admin_panel_settings</span></div>
+            <h1>لوحة إدارة المتجر</h1>
+            <p>تحكم كامل في محتوى المتجر بدون لمس الكود</p>
+            <input type="password" id="admin-pass" class="field" placeholder="كلمة مرور المدير">
+            <button id="btn-login" class="btn btn-primary btn-block"><span class="ms">lock_open</span> دخول</button>
+            <button id="btn-bio" class="btn btn-ghost btn-block hidden"><span class="ms">fingerprint</span> دخول بالبصمة</button>
+            <p id="login-error" class="login-error hidden">كلمة المرور غير صحيحة</p>
+        </div>
+    </section>
+
+    <!-- اللوحة -->
+    <section id="dash-view" class="admin-dash hidden">
+        <header class="admin-header glass">
+            <div class="admin-brand"><span class="ms">storefront</span><b>إدارة المتجر</b></div>
+            <div class="admin-actions">
+                <button id="theme-toggle" class="icon-btn" aria-label="الثيم"><span class="ms">light_mode</span></button>
+                <button id="btn-reload" class="icon-btn" aria-label="تحديث"><span class="ms">refresh</span></button>
+                <button id="btn-save" class="btn btn-primary"><span class="ms">cloud_upload</span> حفظ ونشر</button>
+                <button id="btn-logout" class="icon-btn" aria-label="خروج"><span class="ms">logout</span></button>
+            </div>
+        </header>
+
+        <div class="admin-body">
+            <nav class="admin-tabs glass" id="admin-tabs">
+                <button data-tab="settings" class="tab active"><span class="ms">tune</span> الإعدادات</button>
+                <button data-tab="media" class="tab"><span class="ms">image</span> الصور واللقطات</button>
+                <button data-tab="versions" class="tab"><span class="ms">history</span> الإصدارات</button>
+                <button data-tab="features" class="tab"><span class="ms">stars</span> المميزات</button>
+                <button data-tab="announce" class="tab"><span class="ms">campaign</span> الإعلانات</button>
+                <button data-tab="pages" class="tab"><span class="ms">article</span> الصفحات</button>
+                <button data-tab="sections" class="tab"><span class="ms">visibility</span> الأقسام</button>
+                <button data-tab="contact" class="tab"><span class="ms">contact_support</span> التواصل</button>
+                <button data-tab="connect" class="tab"><span class="ms">key</span> الاتصالات</button>
+            </nav>
+
+            <main class="admin-content">
+
+                <section id="tab-settings" class="tab-panel active">
+                    <h2>الإعدادات العامة</h2>
+                    <div class="grid-2">
+                        <label>اسم التطبيق<input id="f-name" class="field"></label>
+                        <label>رقم الإصدار<input id="f-version" class="field" dir="ltr"></label>
+                        <label>تاريخ الإصدار<input id="f-date" type="date" class="field" dir="ltr"></label>
+                        <label>رابط تحميل APK<input id="f-apk" class="field" dir="ltr"></label>
+                    </div>
+                    <label>الوصف القصير<textarea id="f-short" class="field" rows="2"></textarea></label>
+                    <label>الوصف الطويل<textarea id="f-long" class="field" rows="4"></textarea></label>
+                    <div class="grid-2">
+                        <div class="glass-card media-box">
+                            <h3>أيقونة التطبيق</h3>
+                            <img id="prev-icon" class="media-prev" alt="">
+                            <input type="file" id="up-icon" accept="image/*" class="hidden">
+                            <button class="btn btn-ghost" data-pick="up-icon"><span class="ms">upload</span> رفع أيقونة</button>
+                        </div>
+                        <div class="glass-card media-box">
+                            <h3>بانر المتجر</h3>
+                            <img id="prev-banner" class="media-prev" alt="">
+                            <input type="file" id="up-banner" accept="image/*" class="hidden">
+                            <button class="btn btn-ghost" data-pick="up-banner"><span class="ms">upload</span> رفع بانر</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-media" class="tab-panel">
+                    <h2>لقطات الشاشة</h2>
+                    <div id="shots-list" class="media-list"></div>
+                    <input type="file" id="up-shot" accept="image/*" class="hidden">
+                    <button class="btn btn-primary" data-pick="up-shot"><span class="ms">add_photo_alternate</span> إضافة لقطة</button>
+                </section>
+
+                <section id="tab-versions" class="tab-panel">
+                    <h2>سجل الإصدارات</h2>
+                    <div id="versions-list" class="rows"></div>
+                    <div class="glass-card add-form">
+                        <h3>إضافة إصدار جديد</h3>
+                        <div class="grid-2">
+                            <input id="v-version" class="field" placeholder="مثال: 1.1.0" dir="ltr">
+                            <input id="v-date" type="date" class="field" dir="ltr">
+                        </div>
+                        <textarea id="v-notes" class="field" rows="3" placeholder="ملاحظات الإصدار (ماذا الجديد)"></textarea>
+                        <button id="btn-add-version" class="btn btn-primary"><span class="ms">add</span> إضافة</button>
+                    </div>
+                </section>
+
+                <section id="tab-features" class="tab-panel">
+                    <h2>المميزات</h2>
+                    <div id="features-list" class="rows"></div>
+                    <div class="glass-card add-form">
+                        <h3>إضافة ميزة</h3>
+                        <div class="grid-2">
+                            <input id="ft-icon" class="field" placeholder="أيقونة Material مثل: star" dir="ltr">
+                            <input id="ft-title" class="field" placeholder="عنوان الميزة">
+                        </div>
+                        <textarea id="ft-text" class="field" rows="2" placeholder="وصف الميزة"></textarea>
+                        <button id="btn-add-feature" class="btn btn-primary"><span class="ms">add</span> إضافة</button>
+                    </div>
+                </section>
+
+                <section id="tab-announce" class="tab-panel">
+                    <h2>الإعلان الرئيسي</h2>
+                    <label class="switch-row glass-card"><input type="checkbox" id="an-enabled"><span>تفعيل شريط الإعلان أعلى المتجر</span></label>
+                    <textarea id="an-text" class="field" rows="2" placeholder="نص الإعلان"></textarea>
+                </section>
+
+                <section id="tab-pages" class="tab-panel">
+                    <h2>الصفحات والنصوص</h2>
+                    <label>عن التطبيق<textarea id="p-about" class="field" rows="5"></textarea></label>
+                    <label>عن أثير<textarea id="p-brand" class="field" rows="4"></textarea></label>
+                    <label>سياسة الخصوصية<textarea id="p-privacy" class="field" rows="6"></textarea></label>
+                    <label>شروط الاستخدام<textarea id="p-terms" class="field" rows="6"></textarea></label>
+                </section>
+
+                <section id="tab-sections" class="tab-panel">
+                    <h2>إظهار / إخفاء الأقسام</h2>
+                    <div id="sections-box" class="switches"></div>
+                </section>
+
+                <section id="tab-contact" class="tab-panel">
+                    <h2>بيانات التواصل</h2>
+                    <div class="grid-2">
+                        <label>هاتف<input id="c-phone" class="field" dir="ltr"></label>
+                        <label>واتساب<input id="c-whatsapp" class="field" dir="ltr"></label>
+                        <label>بريد إلكتروني<input id="c-email" class="field" dir="ltr"></label>
+                        <label>تيليجرام (يوزر بدون @)<input id="c-telegram" class="field" dir="ltr"></label>
+                    </div>
+                </section>
+
+                <section id="tab-connect" class="tab-panel">
+                    <h2>الاتصالات والتكاملات</h2>
+                    <p class="hint">تُحفظ هذه القيم على جهازك فقط ولا تُرفع إلى المستودع أبداً.</p>
+                    <label>توكن بوت تيليجرام<input id="tg-token" class="field" dir="ltr" placeholder="123456:ABC-..."></label>
+                    <div class="grid-2">
+                        <label>معرف القناة<input id="tg-channel" class="field" dir="ltr" value="-1004394473630"></label>
+                        <label>توكن GitHub (fine-grained)<input id="gh-token" class="field" dir="ltr" placeholder="github_pat_..."></label>
+                    </div>
+                    <div class="row-btns">
+                        <button id="btn-test-tg" class="btn btn-ghost"><span class="ms">bolt</span> اختبار تيليجرام</button>
+                        <button id="btn-save-connect" class="btn btn-primary"><span class="ms">save</span> حفظ الاتصالات</button>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </section>
+
+    <div id="toast" class="admin-toast hidden"></div>
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
