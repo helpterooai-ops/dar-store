@@ -1,0 +1,40 @@
+/* ============================================================
+   الدار نت | المتجر الرسمي — themes.css
+   ألوان الوضعين الليلي والفاتح + الأنماط الزخرفية
+   ============================================================ */
+
+/* ===== الوضع الداكن (افتراضي — فاخر) ===== */
+[data-theme="dark"] {
+    --bg: #0A0E1A;
+    --bg-pattern: radial-gradient(ellipse at top, rgba(37, 99, 235, .15), transparent 60%),
+                  radial-gradient(ellipse at bottom right, rgba(217, 119, 6, .12), transparent 55%),
+                  radial-gradient(ellipse at bottom left, rgba(16, 185, 129, .08), transparent 50%);
+    --text: #F1F5F9;
+    --text-muted: #94A3B8;
+    --accent: #D97706;
+    --accent-2: #F59E0B;
+    --accent-text: #FFFFFF;
+    --glass-bg: rgba(30, 41, 59, .55);
+    --glass-border: rgba(148, 163, 184, .15);
+    --glass-hover: rgba(51, 65, 85, .7);
+    --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, .5),
+                    inset 0 1px 0 rgba(255, 255, 255, .05);
+}
+
+/* ===== الوضع الفاتح ===== */
+[data-theme="light"] {
+    --bg: #F8FAFC;
+    --bg-pattern: radial-gradient(ellipse at top, rgba(37, 99, 235, .1), transparent 60%),
+                  radial-gradient(ellipse at bottom right, rgba(217, 119, 6, .08), transparent 55%),
+                  radial-gradient(ellipse at bottom left, rgba(16, 185, 129, .06), transparent 50%);
+    --text: #0F172A;
+    --text-muted: #64748B;
+    --accent: #D97706;
+    --accent-2: #B45309;
+    --accent-text: #FFFFFF;
+    --glass-bg: rgba(255, 255, 255, .65);
+    --glass-border: rgba(148, 163, 184, .25);
+    --glass-hover: rgba(255, 255, 255, .85);
+    --shadow-glass: 0 10px 40px -10px rgba(15, 23, 42, .15),
+                    inset 0 1px 0 rgba(255, 255, 255, .8);
+}
