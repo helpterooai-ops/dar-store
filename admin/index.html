@@ -27,15 +27,6 @@
     </section>
 
     <section id="dash-view" class="admin-dash hidden">
-        <header class="admin-header glass">
-            <div class="admin-brand"><span class="ms">storefront</span><b>إدارة المتجر</b></div>
-            <div class="admin-actions">
-                <button id="theme-toggle" class="icon-btn" aria-label="الثيم"><span class="ms">light_mode</span></button>
-                <button id="btn-reload" class="icon-btn" aria-label="تحديث"><span class="ms">refresh</span></button>
-                <button id="btn-save" class="btn btn-primary"><span class="ms">cloud_upload</span> حفظ ونشر</button>
-                <button id="btn-logout" class="icon-btn" aria-label="خروج"><span class="ms">logout</span></button>
-            </div>
-        </header>
 
         <div class="admin-body">
             <nav class="admin-tabs glass" id="admin-tabs">
@@ -153,6 +144,14 @@
 
             </main>
         </div>
+
+        <!-- الشريط السفلي العائم -->
+        <nav class="admin-bottom">
+            <button id="btn-save" class="bottom-save"><span class="ms">cloud_upload</span> حفظ ونشر</button>
+            <button id="btn-reload" class="bottom-btn" aria-label="تحديث"><span class="ms">refresh</span></button>
+            <button id="theme-toggle" class="bottom-btn" aria-label="الثيم"><span class="ms">light_mode</span></button>
+            <button id="btn-logout" class="bottom-btn" aria-label="خروج"><span class="ms">logout</span></button>
+        </nav>
     </section>
 
     <div id="toast" class="admin-toast hidden"></div>
