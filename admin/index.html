@@ -14,7 +14,6 @@
 </head>
 <body>
 
-    <!-- الدخول -->
     <section id="login-view" class="admin-login">
         <div class="glass-card login-card">
             <div class="login-logo"><span class="ms">admin_panel_settings</span></div>
@@ -27,7 +26,6 @@
         </div>
     </section>
 
-    <!-- اللوحة -->
     <section id="dash-view" class="admin-dash hidden">
         <header class="admin-header glass">
             <div class="admin-brand"><span class="ms">storefront</span><b>إدارة المتجر</b></div>
@@ -146,14 +144,10 @@
 
                 <section id="tab-connect" class="tab-panel">
                     <h2>الاتصالات والتكاملات</h2>
-                    <p class="hint">تُحفظ هذه القيم على جهازك فقط ولا تُرفع إلى المستودع أبداً.</p>
-                    <label>توكن بوت تيليجرام<input id="tg-token" class="field" dir="ltr" placeholder="123456:ABC-..."></label>
-                    <div class="grid-2">
-                        <label>معرف القناة<input id="tg-channel" class="field" dir="ltr" value="-1004394473630"></label>
-                        <label>توكن GitHub (fine-grained)<input id="gh-token" class="field" dir="ltr" placeholder="github_pat_..."></label>
-                    </div>
+                    <p class="hint">تُحفظ هذه القيم على جهازك فقط.</p>
+                    <label>مفتاح ImgBB للصور الدائمة (احصل عليه مجاناً من api.imgbb.com)<input id="imgbb-key" class="field" dir="ltr" placeholder="6d207e02198a..."></label>
+                    <label>توكن GitHub (fine-grained)<input id="gh-token" class="field" dir="ltr" placeholder="github_pat_..."></label>
                     <div class="row-btns">
-                        <button id="btn-test-tg" class="btn btn-ghost"><span class="ms">bolt</span> اختبار تيليجرام</button>
                         <button id="btn-save-connect" class="btn btn-primary"><span class="ms">save</span> حفظ الاتصالات</button>
                     </div>
                 </section>

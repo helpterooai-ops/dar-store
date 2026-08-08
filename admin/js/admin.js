@@ -1,8 +1,7 @@
 // ============================================================
-// لوحة إدارة المتجر — نسخة موحدة مكتفية ذاتياً
+// لوحة إدارة المتجر — نسخة كاملة (ImgBB للصور الدائمة)
 // ============================================================
 
-/* ================= الإعدادات ================= */
 const CONFIG = {
     GH_OWNER: 'helpterooai-ops',
     GH_REPO: 'dar-store',
@@ -10,15 +9,13 @@ const CONFIG = {
     CONTENT_PATH: 'data/content.json',
     ADMIN_PASSWORD: 'aldar2025',
     KEYS: {
-        TG_TOKEN: 'aldar_tg_token',
-        TG_CHANNEL: 'aldar_tg_channel',
+        IMGBB: 'aldar_imgbb_key',
         GH_TOKEN: 'aldar_gh_token',
         SESSION: 'aldar_admin_session',
         BIO: 'aldar_admin_bio',
     },
 };
 
-/* ================= الثيم ================= */
 const Theme = {
     init() {
         this.apply(localStorage.getItem('aldar_theme') || 'dark');
@@ -36,37 +33,22 @@ const Theme = {
     },
 };
 
-/* ================= تيليجرام ================= */
-const Telegram = {
-    token() { return localStorage.getItem(CONFIG.KEYS.TG_TOKEN) || ''; },
-    channel() { return localStorage.getItem(CONFIG.KEYS.TG_CHANNEL) || '-1004394473630'; },
-    async api(method, payload) {
-        const token = this.token();
-        if (!token) throw new Error('أدخل توكن البوت أولاً من تبويب «الاتصالات»');
-        const res = await fetch(`https://api.telegram.org/bot${token}/${method}`,
-            payload ? { method: 'POST', body: payload } : undefined);
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.description || 'خطأ في الاتصال بتيليجرام');
-        return json.result;
-    },
-    async test() { const me = await this.api('getMe'); return me.username || me.first_name; },
-    async uploadPhoto(file, caption) {
+// ===== ImgBB لرفع الصور الدائمة =====
+const ImgBB = {
+    key() { return localStorage.getItem(CONFIG.KEYS.IMGBB) || ''; },
+    async upload(file) {
+        const key = this.key();
+        if (!key) throw new Error('أدخل مفتاح ImgBB من تبويب «الاتصالات» أولاً');
         const fd = new FormData();
-        fd.append('chat_id', this.channel());
-        fd.append('photo', file);
-        if (caption) fd.append('caption', caption);
-        const msg = await this.api('sendPhoto', fd);
-        const sizes = msg.photo || [];
-        if (!sizes.length) throw new Error('تعذر رفع الصورة');
-        const best = sizes[sizes.length - 1];
-        const fd2 = new FormData();
-        fd2.append('file_id', best.file_id);
-        const info = await this.api('getFile', fd2);
-        return { url: `https://api.telegram.org/file/bot${this.token()}/${info.file_path}`, fileId: best.file_id };
+        fd.append('image', file);
+        fd.append('key', key);
+        const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error?.message || 'فشل رفع الصورة');
+        return { url: json.data.url, id: json.data.id };
     },
 };
 
-/* ================= GitHub ================= */
 const GitHub = {
     token() { return localStorage.getItem(CONFIG.KEYS.GH_TOKEN) || ''; },
     headers() { return { Authorization: `Bearer ${this.token()}`, Accept: 'application/vnd.github+json' }; },
@@ -94,7 +76,6 @@ const GitHub = {
     },
 };
 
-/* ================= أدوات ================= */
 const $ = (id) => document.getElementById(id);
 const toast = (msg, type = '') => {
     const t = $('toast');
@@ -106,10 +87,8 @@ const toast = (msg, type = '') => {
     t._h = setTimeout(() => t.classList.add('hidden'), 3500);
 };
 
-let DATA = null;
-let APP = null;
+let DATA = null, APP = null;
 
-/* ================= الدخول والبصمة ================= */
 async function enterDashboard() {
     sessionStorage.setItem(CONFIG.KEYS.SESSION, '1');
     $('login-view').classList.add('hidden');
@@ -128,11 +107,8 @@ async function registerBio() {
             authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
             timeout: 60000,
         }});
-        if (cred) {
-            const b64 = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
-            localStorage.setItem(CONFIG.KEYS.BIO, b64);
-        }
-    } catch (e) { /* البصمة اختيارية */ }
+        if (cred) localStorage.setItem(CONFIG.KEYS.BIO, btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+    } catch {}
 }
 
 async function loginWithBio() {
@@ -142,17 +118,15 @@ async function loginWithBio() {
         await navigator.credentials.get({ publicKey: {
             challenge: crypto.getRandomValues(new Uint8Array(32)),
             allowCredentials: [{ type: 'public-key', id: Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer }],
-            userVerification: 'required',
-            timeout: 60000,
+            userVerification: 'required', timeout: 60000,
         }});
         await enterDashboard();
-    } catch (e) { toast('لم تُقبل البصمة', 'err'); }
+    } catch { toast('لم تُقبل البصمة', 'err'); }
 }
 
 function initAuth() {
     if (sessionStorage.getItem(CONFIG.KEYS.SESSION)) { enterDashboard(); return; }
     if (localStorage.getItem(CONFIG.KEYS.BIO)) $('btn-bio').classList.remove('hidden');
-
     $('btn-login').addEventListener('click', async () => {
         if ($('admin-pass').value === CONFIG.ADMIN_PASSWORD) {
             if (!localStorage.getItem(CONFIG.KEYS.BIO)) registerBio();
@@ -164,13 +138,9 @@ function initAuth() {
     });
     $('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-login').click(); });
     $('btn-bio').addEventListener('click', loginWithBio);
-    $('btn-logout').addEventListener('click', () => {
-        sessionStorage.removeItem(CONFIG.KEYS.SESSION);
-        location.reload();
-    });
+    $('btn-logout').addEventListener('click', () => { sessionStorage.removeItem(CONFIG.KEYS.SESSION); location.reload(); });
 }
 
-/* ================= تحميل البيانات ================= */
 async function loadAndBind() {
     try {
         const res = await fetch(`../${CONFIG.CONTENT_PATH}?v=${Date.now()}`, { cache: 'no-store' });
@@ -178,9 +148,7 @@ async function loadAndBind() {
         APP = (DATA.apps || [])[0];
         if (!APP) throw new Error('لا يوجد تطبيق في content.json');
         bindAll();
-    } catch (err) {
-        toast('فشل تحميل البيانات: ' + err.message, 'err');
-    }
+    } catch (err) { toast('فشل تحميل البيانات: ' + err.message, 'err'); }
 }
 
 function bindAll() {
@@ -192,31 +160,21 @@ function bindAll() {
     $('f-long').value = APP.longDescription || '';
     if (APP.iconUrl) $('prev-icon').src = APP.iconUrl;
     if (APP.bannerUrl) $('prev-banner').src = APP.bannerUrl;
-
     $('an-enabled').checked = !!(APP.announcement && APP.announcement.enabled);
     $('an-text').value = (APP.announcement && APP.announcement.text) || '';
-
     $('p-about').value = APP.about || '';
     $('p-brand').value = APP.aboutBrand || '';
     $('p-privacy').value = APP.privacy || '';
     $('p-terms').value = APP.terms || '';
-
     $('c-phone').value = (APP.contact && APP.contact.phone) || '';
     $('c-whatsapp').value = (APP.contact && APP.contact.whatsapp) || '';
     $('c-email').value = (APP.contact && APP.contact.email) || '';
     $('c-telegram').value = (APP.contact && APP.contact.telegram) || '';
-
-    renderShots();
-    renderVersions();
-    renderFeatures();
-    renderSections();
-
-    $('tg-token').value = localStorage.getItem(CONFIG.KEYS.TG_TOKEN) || '';
-    $('tg-channel').value = localStorage.getItem(CONFIG.KEYS.TG_CHANNEL) || '-1004394473630';
+    renderShots(); renderVersions(); renderFeatures(); renderSections();
+    $('imgbb-key').value = localStorage.getItem(CONFIG.KEYS.IMGBB) || '';
     $('gh-token').value = localStorage.getItem(CONFIG.KEYS.GH_TOKEN) || '';
 }
 
-/* ================= ربط الحقول ================= */
 function bindInputs() {
     const map = [
         ['f-name', v => APP.name = v],
@@ -247,7 +205,6 @@ function bindInputs() {
     });
 }
 
-/* ================= اللقطات ================= */
 function renderShots() {
     const shots = APP.screenshots || [];
     $('shots-list').innerHTML = shots.map((s, i) => `
@@ -269,7 +226,7 @@ function initShots() {
         const i = +btn.dataset.i;
         const shots = APP.screenshots;
         if (btn.dataset.act === 'del') {
-            if (confirm('حذف هذه اللقطة؟')) { shots.splice(i, 1); renderShots(); toast('تم الحذف — اضغط حفظ ونشر'); }
+            if (confirm('حذف هذه اللقطة؟')) { shots.splice(i, 1); renderShots(); toast('تم الحذف — احفظ ونشر'); }
         } else if (btn.dataset.act === 'up' && i > 0) {
             [shots[i - 1], shots[i]] = [shots[i], shots[i - 1]]; renderShots();
         } else if (btn.dataset.act === 'down' && i < shots.length - 1) {
@@ -278,14 +235,10 @@ function initShots() {
     });
 }
 
-/* ================= الإصدارات ================= */
 function renderVersions() {
     $('versions-list').innerHTML = (APP.versions || []).map((v, i) => `
         <div class="row-item glass-card">
-            <div>
-                <div class="ri-title">الإصدار ${v.version}</div>
-                <div class="ri-sub">${v.date || ''} — ${v.notes || ''}</div>
-            </div>
+            <div><div class="ri-title">الإصدار ${v.version}</div><div class="ri-sub">${v.date || ''} — ${v.notes || ''}</div></div>
             <div class="row-actions">
                 <button class="mi-btn" data-act="latest" data-i="${i}"><span class="ms">publish</span></button>
                 <button class="mi-btn" data-act="del" data-i="${i}"><span class="ms">delete</span></button>
@@ -310,7 +263,6 @@ function initVersions() {
         renderVersions(); bindAll();
         toast('أُضيف الإصدار وعُيّن كأحدث — احفظ ونشر', 'ok');
     });
-
     $('versions-list').addEventListener('click', e => {
         const btn = e.target.closest('.mi-btn');
         if (!btn || !APP) return;
@@ -328,14 +280,10 @@ function initVersions() {
     });
 }
 
-/* ================= المميزات ================= */
 function renderFeatures() {
     $('features-list').innerHTML = (APP.features || []).map((f, i) => `
         <div class="row-item glass-card">
-            <div>
-                <div class="ri-title">${f.title}</div>
-                <div class="ri-sub">${f.text || ''}</div>
-            </div>
+            <div><div class="ri-title">${f.title}</div><div class="ri-sub">${f.text || ''}</div></div>
             <div class="row-actions">
                 <button class="mi-btn" data-act="up" data-i="${i}"><span class="ms">arrow_upward</span></button>
                 <button class="mi-btn" data-act="down" data-i="${i}"><span class="ms">arrow_downward</span></button>
@@ -358,7 +306,6 @@ function initFeatures() {
         renderFeatures();
         toast('أُضيفت الميزة — احفظ ونشر', 'ok');
     });
-
     $('features-list').addEventListener('click', e => {
         const btn = e.target.closest('.mi-btn');
         if (!btn || !APP) return;
@@ -370,15 +317,9 @@ function initFeatures() {
     });
 }
 
-/* ================= الأقسام ================= */
 const SECTION_LABELS = {
-    screenshots: 'لقطات الشاشة',
-    features: 'المميزات',
-    whatsnew: 'ماذا الجديد',
-    versions: 'سجل الإصدارات',
-    about: 'عن التطبيق',
-    brand: 'عن أثير',
-    contact: 'تواصل معنا',
+    screenshots: 'لقطات الشاشة', features: 'المميزات', whatsnew: 'ماذا الجديد',
+    versions: 'سجل الإصدارات', about: 'عن التطبيق', brand: 'عن أثير', contact: 'تواصل معنا',
 };
 
 function renderSections() {
@@ -398,42 +339,38 @@ function initSections() {
     });
 }
 
-/* ================= رفع الصور ================= */
 function initUploads() {
     document.querySelectorAll('[data-pick]').forEach(btn => {
         btn.addEventListener('click', () => { const t = $(btn.dataset.pick); if (t) t.click(); });
     });
-
     $('up-icon').addEventListener('change', async e => {
         const file = e.target.files[0];
         if (!file || !APP) return;
         try {
-            toast('جارٍ رفع الأيقونة إلى تيليجرام...');
-            const r = await Telegram.uploadPhoto(file, 'أيقونة تطبيق الدار نت');
+            toast('جارٍ رفع الأيقونة إلى ImgBB...');
+            const r = await ImgBB.upload(file);
             APP.iconUrl = r.url;
             $('prev-icon').src = r.url;
             toast('تم رفع الأيقونة — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
-
     $('up-banner').addEventListener('change', async e => {
         const file = e.target.files[0];
         if (!file || !APP) return;
         try {
             toast('جارٍ رفع البانر...');
-            const r = await Telegram.uploadPhoto(file, 'بانر متجر الدار نت');
+            const r = await ImgBB.upload(file);
             APP.bannerUrl = r.url;
             $('prev-banner').src = r.url;
             toast('تم رفع البانر — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
-
     $('up-shot').addEventListener('change', async e => {
         const file = e.target.files[0];
         if (!file || !APP) return;
         try {
             toast('جارٍ رفع اللقطة...');
-            const r = await Telegram.uploadPhoto(file, 'لقطة من تطبيق الدار نت');
+            const r = await ImgBB.upload(file);
             APP.screenshots = APP.screenshots || [];
             APP.screenshots.push({ url: r.url });
             renderShots();
@@ -442,24 +379,14 @@ function initUploads() {
     });
 }
 
-/* ================= الاتصالات ================= */
 function initConnect() {
     $('btn-save-connect').addEventListener('click', () => {
-        localStorage.setItem(CONFIG.KEYS.TG_TOKEN, $('tg-token').value.trim());
-        localStorage.setItem(CONFIG.KEYS.TG_CHANNEL, $('tg-channel').value.trim());
+        localStorage.setItem(CONFIG.KEYS.IMGBB, $('imgbb-key').value.trim());
         localStorage.setItem(CONFIG.KEYS.GH_TOKEN, $('gh-token').value.trim());
         toast('تم حفظ الاتصالات على جهازك', 'ok');
     });
-
-    $('btn-test-tg').addEventListener('click', async () => {
-        try {
-            const name = await Telegram.test();
-            toast('البوت متصل: @' + name, 'ok');
-        } catch (err) { toast(err.message, 'err'); }
-    });
 }
 
-/* ================= التبويبات ================= */
 function initTabs() {
     $('admin-tabs').addEventListener('click', e => {
         const tab = e.target.closest('.tab');
@@ -469,7 +396,6 @@ function initTabs() {
     });
 }
 
-/* ================= الحفظ والنشر ================= */
 function initSave() {
     $('btn-save').addEventListener('click', async () => {
         try {
@@ -478,14 +404,12 @@ function initSave() {
             toast('تم النشر — سيظهر التغيير في المتجر خلال دقيقة', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
-
     $('btn-reload').addEventListener('click', async () => {
         toast('إعادة تحميل البيانات...');
         await loadAndBind();
     });
 }
 
-/* ================= التشغيل ================= */
 Theme.init();
 initAuth();
 initTabs();
