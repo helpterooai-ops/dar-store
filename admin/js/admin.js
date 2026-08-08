@@ -1,5 +1,5 @@
 // ============================================================
-// لوحة إدارة المتجر — نسخة كاملة (ImgBB للصور الدائمة)
+// لوحة إدارة المتجر — الصور والنشر عبر GitHub مباشرة
 // ============================================================
 
 const CONFIG = {
@@ -9,7 +9,6 @@ const CONFIG = {
     CONTENT_PATH: 'data/content.json',
     ADMIN_PASSWORD: 'aldar2025',
     KEYS: {
-        IMGBB: 'aldar_imgbb_key',
         GH_TOKEN: 'aldar_gh_token',
         SESSION: 'aldar_admin_session',
         BIO: 'aldar_admin_bio',
@@ -30,22 +29,6 @@ const Theme = {
         localStorage.setItem('aldar_theme', theme);
         const icon = document.querySelector('#theme-toggle .ms');
         if (icon) icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
-    },
-};
-
-// ===== ImgBB لرفع الصور الدائمة =====
-const ImgBB = {
-    key() { return localStorage.getItem(CONFIG.KEYS.IMGBB) || ''; },
-    async upload(file) {
-        const key = this.key();
-        if (!key) throw new Error('أدخل مفتاح ImgBB من تبويب «الاتصالات» أولاً');
-        const fd = new FormData();
-        fd.append('image', file);
-        fd.append('key', key);
-        const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
-        const json = await res.json();
-        if (!json.success) throw new Error(json.error?.message || 'فشل رفع الصورة');
-        return { url: json.data.url, id: json.data.id };
     },
 };
 
@@ -73,6 +56,28 @@ const GitHub = {
             throw new Error(err.message || 'فشل النشر على GitHub');
         }
         return true;
+    },
+    // رفع صورة إلى مجلد assets/uploads وإرجاع رابطها الدائم
+    async uploadImage(file, prefix) {
+        if (!this.token()) throw new Error('أدخل توكن GitHub من تبويب «الاتصالات» أولاً');
+        const ext = (file.name.split('.').pop() || 'png').replace(/[^a-zA-Z0-9]/g, '') || 'png';
+        const path = `assets/uploads/${prefix}-${Date.now()}.${ext}`;
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) {
+            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        }
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.GH_OWNER}/${CONFIG.GH_REPO}/contents/${path}`, {
+            method: 'PUT',
+            headers: { ...this.headers(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'رفع صورة للمتجر', content: btoa(binary), branch: CONFIG.GH_BRANCH }),
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || 'فشل رفع الصورة');
+        }
+        return { url: `https://${CONFIG.GH_OWNER}.github.io/${CONFIG.GH_REPO}/${path}` };
     },
 };
 
@@ -171,7 +176,6 @@ function bindAll() {
     $('c-email').value = (APP.contact && APP.contact.email) || '';
     $('c-telegram').value = (APP.contact && APP.contact.telegram) || '';
     renderShots(); renderVersions(); renderFeatures(); renderSections();
-    $('imgbb-key').value = localStorage.getItem(CONFIG.KEYS.IMGBB) || '';
     $('gh-token').value = localStorage.getItem(CONFIG.KEYS.GH_TOKEN) || '';
 }
 
@@ -347,11 +351,11 @@ function initUploads() {
         const file = e.target.files[0];
         if (!file || !APP) return;
         try {
-            toast('جارٍ رفع الأيقونة إلى ImgBB...');
-            const r = await ImgBB.upload(file);
+            toast('جارٍ رفع الأيقونة إلى GitHub...');
+            const r = await GitHub.uploadImage(file, 'icon');
             APP.iconUrl = r.url;
             $('prev-icon').src = r.url;
-            toast('تم رفع الأيقونة — احفظ ونشر', 'ok');
+            toast('تم الرفع — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
     $('up-banner').addEventListener('change', async e => {
@@ -359,10 +363,10 @@ function initUploads() {
         if (!file || !APP) return;
         try {
             toast('جارٍ رفع البانر...');
-            const r = await ImgBB.upload(file);
+            const r = await GitHub.uploadImage(file, 'banner');
             APP.bannerUrl = r.url;
             $('prev-banner').src = r.url;
-            toast('تم رفع البانر — احفظ ونشر', 'ok');
+            toast('تم الرفع — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
     $('up-shot').addEventListener('change', async e => {
@@ -370,7 +374,7 @@ function initUploads() {
         if (!file || !APP) return;
         try {
             toast('جارٍ رفع اللقطة...');
-            const r = await ImgBB.upload(file);
+            const r = await GitHub.uploadImage(file, 'shot');
             APP.screenshots = APP.screenshots || [];
             APP.screenshots.push({ url: r.url });
             renderShots();
@@ -381,7 +385,6 @@ function initUploads() {
 
 function initConnect() {
     $('btn-save-connect').addEventListener('click', () => {
-        localStorage.setItem(CONFIG.KEYS.IMGBB, $('imgbb-key').value.trim());
         localStorage.setItem(CONFIG.KEYS.GH_TOKEN, $('gh-token').value.trim());
         toast('تم حفظ الاتصالات على جهازك', 'ok');
     });
@@ -401,7 +404,7 @@ function initSave() {
         try {
             toast('جارٍ النشر على GitHub...');
             await GitHub.publish(DATA);
-            toast('تم النشر — سيظهر التغيير في المتجر خلال دقيقة', 'ok');
+            toast('تم النشر — انتظر دقيقة ثم افتح المتجر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
     $('btn-reload').addEventListener('click', async () => {
