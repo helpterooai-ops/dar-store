@@ -1,5 +1,5 @@
 // ============================================================
-// Renderer - رسم جميع أقسام المتجر
+// Renderer — رسم أقسام المتجر + أزرار تواصل مباشر
 // ============================================================
 
 export class Renderer {
@@ -10,70 +10,54 @@ export class Renderer {
 
     static formatDate(iso) {
         if (!iso) return '--';
-        try {
-            return new Date(iso).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-        } catch { return iso; }
+        try { return new Date(iso).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }); }
+        catch { return iso; }
     }
 
     static renderStore(app, store) {
-        // الإعدادات العامة
         if (store.title) document.title = `${app.name} | ${store.title}`;
         if (store.brand) this.setText('store-title', store.brand);
         this.setText('footer-note', store.footerNote || `© ${new Date().getFullYear()} ${store.brand || ''}`);
 
-        // بيانات التطبيق
         this.setText('app-name', app.name);
         this.setText('app-short', app.shortDescription);
         this.setText('app-version', app.version);
         this.setText('app-date', this.formatDate(app.releaseDate));
 
-        // زر التحميل
         const dl = document.getElementById('btn-download');
         if (dl && app.apkUrl) { dl.href = app.apkUrl; dl.setAttribute('download', ''); }
 
-        // الأيقونة والبانر
         if (app.iconUrl) {
             const img = document.getElementById('app-icon');
             img.src = app.iconUrl; img.hidden = false;
-            img.nextElementSibling && (img.nextElementSibling.style.display = 'none');
+            if (img.nextElementSibling) img.nextElementSibling.style.display = 'none';
         }
         if (app.bannerUrl) {
             const img = document.getElementById('app-banner');
             img.src = app.bannerUrl; img.hidden = false;
         }
 
-        // الإعلان
         if (app.announcement?.enabled && app.announcement.text) {
             this.setText('announcement-text', app.announcement.text);
-            const bar = document.getElementById('announcement-bar'); if (bar) { bar.classList.remove('hidden'); bar.dataset.enabled = '1'; }
+            const bar = document.getElementById('announcement-bar');
+            if (bar) { bar.classList.remove('hidden'); bar.dataset.enabled = '1'; }
         }
 
-        // What's New
         this.setText('whatsnew-body', app.whatsNew || '');
         this.toggleSection('whatsnew', app.sections?.whatsnew);
 
-        // About
         this.setText('about-body', app.about || '');
         this.toggleSection('about', app.sections?.about);
 
-        // Brand
         this.setText('brand-body', app.aboutBrand || '');
         this.toggleSection('brand', app.sections?.brand);
 
-        // Privacy / Terms
         this.setText('privacy-body', app.privacy || '');
         this.setText('terms-body', app.terms || '');
 
-        // Features
         this.renderFeatures(app.features || [], app.sections?.features);
-
-        // Screenshots
         this.renderScreenshots(app.screenshots || [], app.sections?.screenshots);
-
-        // Versions
         this.renderVersions(app.versions || [], app.sections?.versions);
-
-        // Contact
         this.renderContact(app.contact || {}, app.sections?.contact);
     }
 
@@ -124,21 +108,20 @@ export class Renderer {
         `).join('');
     }
 
+    // ===== تواصل مباشر: زر واتساب برسالة جاهزة + زر بريد يفتح الكتابة =====
     static renderContact(c, visible) {
         this.toggleSection('contact', visible);
         const grid = document.getElementById('contact-grid');
         if (!grid) return;
-        const items = [];
-        if (c.phone) items.push({ icon: 'call', label: 'اتصال', value: c.phone, href: `tel:${c.phone}` });
-        if (c.whatsapp) items.push({ icon: 'chat', label: 'واتساب', value: c.whatsapp, href: `https://wa.me/${c.whatsapp.replace(/\D/g, '')}` });
-        if (c.email) items.push({ icon: 'mail', label: 'البريد', value: c.email, href: `mailto:${c.email}` });
-        if (c.telegram) items.push({ icon: 'send', label: 'تيليجرام', value: c.telegram, href: `https://t.me/${c.telegram}` });
-        grid.innerHTML = items.map(i => `
-            <a href="${this.escape(i.href)}" target="_blank" rel="noopener" class="contact-item glass-card reveal">
-                <div class="contact-icon"><span class="ms">${i.icon}</span></div>
-                <div class="contact-info"><strong>${i.label}</strong><span>${this.escape(i.value)}</span></div>
-            </a>
-        `).join('');
+        const wa = (c.whatsapp || '').replace(/\D/g, '');
+        const hello = encodeURIComponent('مرحبا');
+        grid.innerHTML = `
+            <p class="contact-note">${this.escape(c.devNote || 'لديك شبكة أو مشروع وتريد إضافته إلى المتجر؟ تواصل مع مطور البرنامج مباشرة.')}</p>
+            <div class="contact-btns">
+                ${wa ? `<a class="contact-btn wa" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${hello}"><span class="ms">chat</span> مراسلة مباشرة</a>` : ''}
+                ${c.email ? `<a class="contact-btn mail" href="mailto:${this.escape(c.email)}?subject=${encodeURIComponent('التواصل مع مطور البرنامج')}"><span class="ms">mail</span> إرسال بريد</a>` : ''}
+            </div>
+        `;
     }
 
     static escape(str) {

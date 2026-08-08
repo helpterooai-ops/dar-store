@@ -1,5 +1,5 @@
 // ============================================================
-// لوحة إدارة المتجر — الصور والنشر عبر GitHub مباشرة
+// لوحة الإدارة — مع تحرير المميزات وترتيبها
 // ============================================================
 
 const CONFIG = {
@@ -8,11 +8,7 @@ const CONFIG = {
     GH_BRANCH: 'main',
     CONTENT_PATH: 'data/content.json',
     ADMIN_PASSWORD: 'aldar2025',
-    KEYS: {
-        GH_TOKEN: 'aldar_gh_token',
-        SESSION: 'aldar_admin_session',
-        BIO: 'aldar_admin_bio',
-    },
+    KEYS: { GH_TOKEN: 'aldar_gh_token', SESSION: 'aldar_admin_session', BIO: 'aldar_admin_bio' },
 };
 
 const Theme = {
@@ -46,18 +42,10 @@ const GitHub = {
             branch: CONFIG.GH_BRANCH,
         };
         if (cur && cur.sha) body.sha = cur.sha;
-        const res = await fetch(url, {
-            method: 'PUT',
-            headers: { ...this.headers(), 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || 'فشل النشر على GitHub');
-        }
+        const res = await fetch(url, { method: 'PUT', headers: { ...this.headers(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'فشل النشر على GitHub'); }
         return true;
     },
-    // رفع صورة إلى مجلد assets/uploads وإرجاع رابطها الدائم
     async uploadImage(file, prefix) {
         if (!this.token()) throw new Error('أدخل توكن GitHub من تبويب «الاتصالات» أولاً');
         const ext = (file.name.split('.').pop() || 'png').replace(/[^a-zA-Z0-9]/g, '') || 'png';
@@ -65,34 +53,25 @@ const GitHub = {
         const buf = await file.arrayBuffer();
         const bytes = new Uint8Array(buf);
         let binary = '';
-        for (let i = 0; i < bytes.length; i += 0x8000) {
-            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-        }
+        for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
         const res = await fetch(`https://api.github.com/repos/${CONFIG.GH_OWNER}/${CONFIG.GH_REPO}/contents/${path}`, {
             method: 'PUT',
             headers: { ...this.headers(), 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: 'رفع صورة للمتجر', content: btoa(binary), branch: CONFIG.GH_BRANCH }),
         });
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || 'فشل رفع الصورة');
-        }
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'فشل رفع الصورة'); }
         return { url: `https://${CONFIG.GH_OWNER}.github.io/${CONFIG.GH_REPO}/${path}` };
     },
 };
 
 const $ = (id) => document.getElementById(id);
 const toast = (msg, type = '') => {
-    const t = $('toast');
-    if (!t) return;
-    t.textContent = msg;
-    t.className = `admin-toast ${type}`;
-    t.classList.remove('hidden');
-    clearTimeout(t._h);
-    t._h = setTimeout(() => t.classList.add('hidden'), 3500);
+    const t = $('toast'); if (!t) return;
+    t.textContent = msg; t.className = `admin-toast ${type}`; t.classList.remove('hidden');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.add('hidden'), 3500);
 };
 
-let DATA = null, APP = null;
+let DATA = null, APP = null, editingFeature = -1;
 
 async function enterDashboard() {
     sessionStorage.setItem(CONFIG.KEYS.SESSION, '1');
@@ -136,10 +115,7 @@ function initAuth() {
         if ($('admin-pass').value === CONFIG.ADMIN_PASSWORD) {
             if (!localStorage.getItem(CONFIG.KEYS.BIO)) registerBio();
             await enterDashboard();
-        } else {
-            $('login-error').classList.remove('hidden');
-            toast('كلمة المرور غير صحيحة', 'err');
-        }
+        } else { $('login-error').classList.remove('hidden'); toast('كلمة المرور غير صحيحة', 'err'); }
     });
     $('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-login').click(); });
     $('btn-bio').addEventListener('click', loginWithBio);
@@ -231,11 +207,8 @@ function initShots() {
         const shots = APP.screenshots;
         if (btn.dataset.act === 'del') {
             if (confirm('حذف هذه اللقطة؟')) { shots.splice(i, 1); renderShots(); toast('تم الحذف — احفظ ونشر'); }
-        } else if (btn.dataset.act === 'up' && i > 0) {
-            [shots[i - 1], shots[i]] = [shots[i], shots[i - 1]]; renderShots();
-        } else if (btn.dataset.act === 'down' && i < shots.length - 1) {
-            [shots[i + 1], shots[i]] = [shots[i], shots[i + 1]]; renderShots();
-        }
+        } else if (btn.dataset.act === 'up' && i > 0) { [shots[i - 1], shots[i]] = [shots[i], shots[i - 1]]; renderShots(); }
+        else if (btn.dataset.act === 'down' && i < shots.length - 1) { [shots[i + 1], shots[i]] = [shots[i], shots[i + 1]]; renderShots(); }
     });
 }
 
@@ -284,17 +257,25 @@ function initVersions() {
     });
 }
 
+/* ===== المميزات: إضافة + تعديل + حذف + ترتيب ===== */
 function renderFeatures() {
     $('features-list').innerHTML = (APP.features || []).map((f, i) => `
         <div class="row-item glass-card">
-            <div><div class="ri-title">${f.title}</div><div class="ri-sub">${f.text || ''}</div></div>
+            <div><div class="ri-title">${i + 1}. ${f.title}</div><div class="ri-sub">${f.text || ''}</div></div>
             <div class="row-actions">
-                <button class="mi-btn" data-act="up" data-i="${i}"><span class="ms">arrow_upward</span></button>
-                <button class="mi-btn" data-act="down" data-i="${i}"><span class="ms">arrow_downward</span></button>
-                <button class="mi-btn" data-act="del" data-i="${i}"><span class="ms">delete</span></button>
+                <button class="mi-btn" data-act="up" data-i="${i}" title="تقديم"><span class="ms">arrow_upward</span></button>
+                <button class="mi-btn" data-act="down" data-i="${i}" title="تأخير"><span class="ms">arrow_downward</span></button>
+                <button class="mi-btn" data-act="edit" data-i="${i}" title="تعديل"><span class="ms">edit</span></button>
+                <button class="mi-btn" data-act="del" data-i="${i}" title="حذف"><span class="ms">delete</span></button>
             </div>
         </div>
     `).join('') || '<p class="hint">لا توجد مميزات.</p>';
+}
+
+function resetFeatureForm() {
+    editingFeature = -1;
+    $('ft-icon').value = ''; $('ft-title').value = ''; $('ft-text').value = '';
+    $('btn-add-feature').innerHTML = '<span class="ms">add</span> إضافة';
 }
 
 function initFeatures() {
@@ -305,17 +286,33 @@ function initFeatures() {
         const icon = $('ft-icon').value.trim() || 'star';
         if (!title) { toast('أدخل عنوان الميزة', 'err'); return; }
         APP.features = APP.features || [];
-        APP.features.push({ icon, title, text });
-        $('ft-title').value = ''; $('ft-text').value = ''; $('ft-icon').value = '';
+        if (editingFeature >= 0) {
+            APP.features[editingFeature] = { icon, title, text };
+            toast('تم تعديل الميزة — احفظ ونشر', 'ok');
+        } else {
+            APP.features.push({ icon, title, text });
+            toast('أُضيفت الميزة — احفظ ونشر', 'ok');
+        }
+        resetFeatureForm();
         renderFeatures();
-        toast('أُضيفت الميزة — احفظ ونشر', 'ok');
     });
+
     $('features-list').addEventListener('click', e => {
         const btn = e.target.closest('.mi-btn');
         if (!btn || !APP) return;
         const i = +btn.dataset.i;
         const arr = APP.features;
-        if (btn.dataset.act === 'del') { if (confirm('حذف الميزة؟')) { arr.splice(i, 1); renderFeatures(); } }
+        if (btn.dataset.act === 'del') {
+            if (confirm('حذف الميزة؟')) { arr.splice(i, 1); if (editingFeature === i) resetFeatureForm(); renderFeatures(); }
+        }
+        else if (btn.dataset.act === 'edit') {
+            editingFeature = i;
+            $('ft-icon').value = arr[i].icon || '';
+            $('ft-title').value = arr[i].title || '';
+            $('ft-text').value = arr[i].text || '';
+            $('btn-add-feature').innerHTML = '<span class="ms">save</span> حفظ التعديل';
+            toast('عدّل الحقول ثم اضغط حفظ التعديل');
+        }
         else if (btn.dataset.act === 'up' && i > 0) { [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; renderFeatures(); }
         else if (btn.dataset.act === 'down' && i < arr.length - 1) { [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]]; renderFeatures(); }
     });
@@ -348,30 +345,25 @@ function initUploads() {
         btn.addEventListener('click', () => { const t = $(btn.dataset.pick); if (t) t.click(); });
     });
     $('up-icon').addEventListener('change', async e => {
-        const file = e.target.files[0];
-        if (!file || !APP) return;
+        const file = e.target.files[0]; if (!file || !APP) return;
         try {
-            toast('جارٍ رفع الأيقونة إلى GitHub...');
+            toast('جارٍ رفع الأيقونة...');
             const r = await GitHub.uploadImage(file, 'icon');
-            APP.iconUrl = r.url;
-            $('prev-icon').src = r.url;
+            APP.iconUrl = r.url; $('prev-icon').src = r.url;
             toast('تم الرفع — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
     $('up-banner').addEventListener('change', async e => {
-        const file = e.target.files[0];
-        if (!file || !APP) return;
+        const file = e.target.files[0]; if (!file || !APP) return;
         try {
             toast('جارٍ رفع البانر...');
             const r = await GitHub.uploadImage(file, 'banner');
-            APP.bannerUrl = r.url;
-            $('prev-banner').src = r.url;
+            APP.bannerUrl = r.url; $('prev-banner').src = r.url;
             toast('تم الرفع — احفظ ونشر', 'ok');
         } catch (err) { toast(err.message, 'err'); }
     });
     $('up-shot').addEventListener('change', async e => {
-        const file = e.target.files[0];
-        if (!file || !APP) return;
+        const file = e.target.files[0]; if (!file || !APP) return;
         try {
             toast('جارٍ رفع اللقطة...');
             const r = await GitHub.uploadImage(file, 'shot');
