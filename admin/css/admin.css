@@ -74,17 +74,33 @@ textarea.field { resize: vertical; }
 .media-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .media-item { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); background: var(--glass-bg); }
 .media-item img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; }
-.mi-actions { position: absolute; bottom: 0; inset-inline: 0; display: flex; justify-content: center; gap: 6px; padding: 8px; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
-.mi-btn { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px); transition: .2s; }
-.mi-btn:hover { background: var(--accent); }
-.mi-btn .ms { font-size: 18px; }
+.mi-actions { position: absolute; bottom: 0; inset-inline: 0; display: flex; justify-content: center; gap: 8px; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,.85)); }
+
+/* ===== أزرار الإجراءات — ملونة وواضحة في الوضعين ===== */
+.mi-btn {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: .2s;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+}
+.mi-btn .ms { font-size: 20px; }
+.mi-btn[data-act="up"], .mi-btn[data-act="down"] { background: #64748b; }
+.mi-btn[data-act="edit"] { background: #2563eb; }
+.mi-btn[data-act="del"] { background: #ef4444; }
+.mi-btn[data-act="latest"] { background: #10b981; }
+.mi-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+.mi-btn:active { transform: scale(.94); }
 
 /* ===== الصفوف ===== */
 .rows { display: flex; flex-direction: column; gap: 10px; }
 .row-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; flex-wrap: wrap; }
+.row-actions { display: flex; gap: 8px; }
 .ri-title { font-weight: 800; color: var(--text); }
 .ri-sub { color: var(--text-muted); font-size: .82rem; white-space: pre-line; }
-.row-actions { display: flex; gap: 6px; }
 .add-form { display: flex; flex-direction: column; gap: 12px; }
 
 /* ===== المفاتيح ===== */
